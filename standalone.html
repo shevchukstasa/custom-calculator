@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор загрузки печей</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary-color: #10b981;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .radio-label:hover {
+            border-color: var(--primary-color);
+            background: #f0f9ff;
+        }
+
+        .radio-label input {
+            margin-right: 0.75rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 0.5rem;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f0fdf4;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .checkmark {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--background);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .distribution {
+            background: #fefce8;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #eab308;
+            margin-top: 1rem;
+        }
+
+        .distribution h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .distribution ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .distribution li {
+            padding: 0.25rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Калькулятор загрузки печей</h1>
+        <p class="subtitle">Расчет оптимальной загрузки керамических печей</p>
+    </div>
+
+    <div class="container">
+        <div>
+            <div class="card">
+                <h2>Выберите печь</h2>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="kiln" value="big" checked>
+                        <span>Большая печь</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="kiln" value="small">
+                        <span>Малая печь</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h2>Размеры изделия</h2>
+                <form id="productForm">
+                    <div class="input-group">
+                        <label>Длина (см):</label>
+                        <input type="number" id="length" step="0.1" min="0.1" placeholder="30" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Ширина (см):</label>
+                        <input type="number" id="width" step="0.1" min="0.1" placeholder="40" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Толщина (см):</label>
+                        <input type="number" id="thickness" step="0.1" min="0.1" placeholder="1.5" required>
+                    </div>
+                    <button type="submit" class="button">Рассчитать загрузку</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card" id="results">
+            <div class="empty-state">
+                <p>Введите размеры изделия и нажмите "Рассчитать загрузку"</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TILE_GAP = 1.5;
+        const AIR_GAP = 2;
+        const SHELF_THICKNESS = 3;
+        const FLAT_ON_EDGE_COEFFICIENT = 0.3;
+
+        const KILNS = {
+            big: {
+                name: 'Большая печь',
+                workingArea: { width: 54, depth: 84, height: 80 },
+                coefficient: 0.8,
+                multiLevel: true
+            },
+            small: {
+                name: 'Малая печь',
+                workingArea: { width: 95, depth: 150 },
+                coefficient: 0.92,
+                multiLevel: false
+            }
+        };
+
+        function calculateTilesAlongDimension(availableSpace, tileSize, gap = TILE_GAP) {
+            return Math.floor((availableSpace + gap) / (tileSize + gap));
+        }
+
+        function calculateEdgeLoading(kiln, product) {
+            const { workingArea } = kiln;
+            const pairWidth = product.thickness * 2;
+            
+            const pairsAcrossWidth = calculateTilesAlongDimension(workingArea.width, pairWidth);
+            const rowsAcrossDepth = calculateTilesAlongDimension(workingArea.depth, product.length);
+            const edgePiecesPerLevel = pairsAcrossWidth * 2 * rowsAcrossDepth;
+            
+            if (edgePiecesPerLevel === 0) return null;
+            
+            const shelfArea = (workingArea.width * workingArea.depth) / 10000;
+            const flatAreaAvailable = shelfArea * FLAT_ON_EDGE_COEFFICIENT;
+            const productArea = (product.length * product.width) / 10000;
+            const flatPiecesPerLevel = Math.floor(flatAreaAvailable / productArea);
+            
+            const levelHeight = product.length + AIR_GAP + SHELF_THICKNESS + product.thickness;
+            let levels = 1;
+            if (kiln.multiLevel && workingArea.height) {
+                levels = Math.floor(workingArea.height / levelHeight);
+            }
+            
+            const totalEdgePieces = edgePiecesPerLevel * levels;
+            const totalFlatPieces = flatPiecesPerLevel * levels;
+            const totalPieces = totalEdgePieces + totalFlatPieces;
+            const totalArea = totalPieces * productArea;
+            
+            return {
+                method: 'combined',
+                methodName: 'На ребре + плашмя',
+                totalPieces: Math.floor(totalPieces * kiln.coefficient),
+                totalArea: totalArea * kiln.coefficient,
+                levels,
+                edgePieces: Math.floor(totalEdgePieces * kiln.coefficient),
+                flatPieces: Math.floor(totalFlatPieces * kiln.coefficient)
+            };
+        }
+
+        function calculateFlatLoading(kiln, product) {
+            const { workingArea } = kiln;
+            
+            const tilesAcrossWidth = calculateTilesAlongDimension(workingArea.width, product.width);
+            const tilesAcrossDepth = calculateTilesAlongDimension(workingArea.depth, product.length);
+            const piecesPerLevel = tilesAcrossWidth * tilesAcrossDepth;
+            
+            if (piecesPerLevel === 0) return null;
+            
+            const levelHeight = product.thickness + AIR_GAP + SHELF_THICKNESS;
+            let levels = 1;
+            if (kiln.multiLevel && workingArea.height) {
+                levels = Math.floor(workingArea.height / levelHeight);
+            }
+            
+            const totalPieces = piecesPerLevel * levels;
+            const productArea = (product.length * product.width) / 10000;
+            const totalArea = totalPieces * productArea;
+            
+            return {
+                method: 'flat',
+                methodName: 'Плашмя (лицом вверх)',
+                totalPieces: Math.floor(totalPieces * kiln.coefficient),
+                totalArea: totalArea * kiln.coefficient,
+                levels
+            };
+        }
+
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const kilnType = document.querySelector('input[name="kiln"]:checked').value;
+            const kiln = KILNS[kilnType];
+            
+            const product = {
+                length: parseFloat(document.getElementById('length').value),
+                width: parseFloat(document.getElementById('width').value),
+                thickness: parseFloat(document.getElementById('thickness').value)
+            };
+            
+            const edgeLoading = calculateEdgeLoading(kiln, product);
+            const flatLoading = calculateFlatLoading(kiln, product);
+            
+            const optimal = edgeLoading && flatLoading 
+                ? (edgeLoading.totalArea >= flatLoading.totalArea ? edgeLoading : flatLoading)
+                : (edgeLoading || flatLoading);
+            
+            if (!optimal) {
+                alert('Изделие слишком большое для выбранной печи');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <h2>Результаты расчета</h2>
+                <div class="result-header">
+                    <span class="checkmark">✓</span>
+                    <strong>Оптимальный метод: ${optimal.methodName}</strong>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-icon">📦</span>
+                    <div>
+                        <div class="stat-label">Количество изделий</div>
+                        <div class="stat-value">${optimal.totalPieces} шт</div>
+                    </div>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-icon">📐</span>
+                    <div>
+                        <div class="stat-label">Площадь загрузки</div>
+                        <div class="stat-value">${optimal.totalArea.toFixed(2)} м²</div>
+                    </div>
+                </div>
+                
+                ${kiln.multiLevel ? `
+                <div class="stat-item">
+                    <span class="stat-icon">📊</span>
+                    <div>
+                        <div class="stat-label">Количество уровней</div>
+                        <div class="stat-value">${optimal.levels}</div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${optimal.method === 'combined' ? `
+                <div class="distribution">
+                    <h3>Распределение:</h3>
+                    <ul>
+                        <li>На ребре: ${optimal.edgePieces} шт</li>
+                        <li>Плашмя сверху: ${optimal.flatPieces} шт</li>
+                    </ul>
+                </div>
+                ` : ''}
+                
+                <div style="margin-top: 1.5rem; padding: 1rem; background: var(--background); border-radius: 8px;">
+                    <p><strong>Печь:</strong> ${kiln.name}</p>
+                    <p><strong>Размер изделия:</strong> ${product.length} × ${product.width} × ${product.thickness} см</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
