@@ -9,6 +9,7 @@ node_modules/
 .env
 .env.local
 .env.production.local
+# .env.production - committed for Vercel deployment
 
 # Editor
 .DS_Store
