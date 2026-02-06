@@ -150,7 +150,8 @@ export function calculateCost(
   // 12. Конвертация в IDR (рупии) - 1 mil Rp = 1,000,000 IDR
   const IDRperMilRp = 1000000;
 
-  // Минимальная цена за м² в IDR — в финальном результате не показываем меньше
+  // Минимальная цена за м² в IDR — в финальном результате не показываем меньше.
+  // Цена за штуку пересчитывается из этой финальной цены за м²: штука = цена_за_м² × площадь_изделия.
   const MIN_PRICE_PER_SQ_M_IDR = 2_500_000;
   const indonesiaPricePerSqMIdr = Math.round(pricePerSqMIndonesia * IDRperMilRp * 100) / 100;
   const abroadPricePerSqMIdr = Math.round(pricePerSqMAbroad * IDRperMilRp * 100) / 100;
