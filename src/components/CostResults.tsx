@@ -8,13 +8,13 @@ interface CostResultsProps {
 
 export function CostResults({ result, selectedMarket }: CostResultsProps) {
   const isAverage = result.kiln.name.includes('Average');
-  
+
   // Get market-specific data (default to indonesia if not selected)
   const actualMarket = selectedMarket || 'indonesia';
   const marketData = actualMarket === 'indonesia' ? result.indonesia : result.abroad;
   const marketFlag = actualMarket === 'indonesia' ? '🇮🇩' : '🌍';
   const marketName = actualMarket === 'indonesia' ? 'Indonesia' : 'Abroad';
-  
+
   return (
     <div className="cost-results">
       <div className="result-header">
@@ -22,7 +22,7 @@ export function CostResults({ result, selectedMarket }: CostResultsProps) {
       </div>
 
       <div className="results-two-column-layout">
-        {/* Left column: Prices */}
+        {/* Left column: Prices (min 2.5M Rp/m² applied in costCalculations) */}
         <div className="results-left-column">
           <div className="price-item">
             <div className="price-label">Price per 1 m²</div>

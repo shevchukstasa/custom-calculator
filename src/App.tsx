@@ -123,6 +123,9 @@ function App() {
   
   // Price conflict modal state
   const [showPriceConflictModal, setShowPriceConflictModal] = useState(false);
+
+  // Cost result modal: show results in popup after Calculate Cost (close only via OK)
+  const [showCostResultModal, setShowCostResultModal] = useState(false);
   const [conflictPrices, setConflictPrices] = useState<number[]>([]);
   const [conflictEntries, setConflictEntries] = useState<StoneEntry[]>([]);
 
@@ -573,7 +576,8 @@ function App() {
       };
       
       setCostResult(averageResult);
-      
+      setShowCostResultModal(true);
+
       // Save calculation to history and send to Telegram
       const historyEntry = addCalculationToHistory({
         manager: selectedManager,
@@ -635,7 +639,8 @@ function App() {
       );
 
       setCostResult(result);
-      
+      setShowCostResultModal(true);
+
       // Save calculation to history and send to Telegram
       const historyEntry = addCalculationToHistory({
         manager: selectedManager,
@@ -1017,6 +1022,22 @@ function App() {
         message={notificationModal.message}
         type={notificationModal.type}
       />
+
+      {/* Cost Result Modal - closes only on OK */}
+      {showCostResultModal && costResult && (
+        <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Cost calculation results">
+          <div className="modal-content cost-result-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="cost-result-modal-body">
+              <CostResults result={costResult} selectedMarket={selectedMarket} />
+            </div>
+            <div className="cost-result-modal-footer">
+              <button type="button" className="button button-primary" onClick={() => setShowCostResultModal(false)}>
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

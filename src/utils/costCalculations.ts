@@ -147,12 +147,17 @@ export function calculateCost(
   // Для совместимости и отладки
   const totalExpenses = defectExpensesCost + salesExpensesCost + otherExpensesCost;
   
-  // 9. Prices per 1 pcs
-  const pricePerPcsIndonesia = pricePerSqMIndonesia * productArea;
-  const pricePerPcsAbroad = pricePerSqMAbroad * productArea;
-  
   // 12. Конвертация в IDR (рупии) - 1 mil Rp = 1,000,000 IDR
   const IDRperMilRp = 1000000;
+
+  // Минимальная цена за м² в IDR — в финальном результате не показываем меньше
+  const MIN_PRICE_PER_SQ_M_IDR = 2_500_000;
+  const indonesiaPricePerSqMIdr = Math.round(pricePerSqMIndonesia * IDRperMilRp * 100) / 100;
+  const abroadPricePerSqMIdr = Math.round(pricePerSqMAbroad * IDRperMilRp * 100) / 100;
+  const indonesiaPricePerSqMFinal = Math.max(indonesiaPricePerSqMIdr, MIN_PRICE_PER_SQ_M_IDR);
+  const abroadPricePerSqMFinal = Math.max(abroadPricePerSqMIdr, MIN_PRICE_PER_SQ_M_IDR);
+  const indonesiaPricePerPcsFinal = Math.round(indonesiaPricePerSqMFinal * productArea * 100) / 100;
+  const abroadPricePerPcsFinal = Math.round(abroadPricePerSqMFinal * productArea * 100) / 100;
   
   // 13. Собираем все параметры для результата
   const parameters: CostParameters = {
@@ -208,14 +213,14 @@ export function calculateCost(
       finalPrice: pricePerSqMIndonesia, // ПРОДАЖНАЯ ЦЕНА
     },
     indonesia: {
-      pricePerSqM: Math.round(pricePerSqMIndonesia * IDRperMilRp * 100) / 100,
-      pricePerPcs: Math.round(pricePerPcsIndonesia * IDRperMilRp * 100) / 100,
+      pricePerSqM: indonesiaPricePerSqMFinal,
+      pricePerPcs: indonesiaPricePerPcsFinal,
       margin: Math.round(marginValueIndonesia * IDRperMilRp * 100) / 100,
       marginPercent: marginPercentIndonesia,
     },
     abroad: {
-      pricePerSqM: Math.round(pricePerSqMAbroad * IDRperMilRp * 100) / 100,
-      pricePerPcs: Math.round(pricePerPcsAbroad * IDRperMilRp * 100) / 100,
+      pricePerSqM: abroadPricePerSqMFinal,
+      pricePerPcs: abroadPricePerPcsFinal,
       margin: Math.round(marginValueAbroad * IDRperMilRp * 100) / 100,
       marginPercent: marginPercentAbroad,
     },

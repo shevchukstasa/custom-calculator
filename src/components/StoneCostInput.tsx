@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { formatIDR } from '../utils/costCalculations';
 
 interface StoneCostInputProps {
   productArea: number; // m² of one product (length × width / 10000)
-  onStoneCostChange: (costPerSqM: number) => void;
-  initialCostPerSqM?: number;
+  onStoneCostChange: (costPerSqM: number) => void; // parent expects mil Rp per m²
+  initialCostPerSqM?: number; // mil Rp per m² from parent
   onShowDB: () => void;
   onAutoFind: () => void;
   showDB: boolean;
@@ -11,6 +12,8 @@ interface StoneCostInputProps {
   hideButtons?: boolean; // if true, don't render Database/Auto-select buttons
   hideProductArea?: boolean; // if true, don't render product area text
 }
+
+const IDR_PER_MIL = 1e6;
 
 export function StoneCostInput({ 
   productArea,
@@ -24,94 +27,73 @@ export function StoneCostInput({
   hideProductArea = false
 }: StoneCostInputProps) {
   const [inputMode, setInputMode] = useState<'perSqM' | 'perPcs'>('perSqM');
-  const [pricePerSqM, setPricePerSqM] = useState<number>(0);
-  const [pricePerPcs, setPricePerPcs] = useState<number>(0);
-  // String state so "0" and "0.0000" display correctly (number input with value 0 showed empty)
+  // All amounts in IDR (rupiah) for display and internal state
+  const [pricePerSqMIdr, setPricePerSqMIdr] = useState<number>(0);
+  const [pricePerPcsIdr, setPricePerPcsIdr] = useState<number>(0);
   const [pricePerSqMStr, setPricePerSqMStr] = useState<string>('');
   const [pricePerPcsStr, setPricePerPcsStr] = useState<string>('');
 
-  // Sync from parent when initial value or productArea changes
+  // Sync from parent: initialCostPerSqM is in mil Rp → convert to IDR for display
   useEffect(() => {
     if (initialCostPerSqM > 0) {
-      setPricePerSqM(initialCostPerSqM);
-      setPricePerPcs(initialCostPerSqM * productArea);
-      setPricePerSqMStr(String(initialCostPerSqM));
-      setPricePerPcsStr(String(initialCostPerSqM * productArea));
+      const idrPerSqM = initialCostPerSqM * IDR_PER_MIL;
+      setPricePerSqMIdr(idrPerSqM);
+      setPricePerPcsIdr(idrPerSqM * productArea);
+      setPricePerSqMStr(idrPerSqM % 1 === 0 ? String(Math.round(idrPerSqM)) : String(idrPerSqM));
+      setPricePerPcsStr(idrPerSqM * productArea % 1 === 0 ? String(Math.round(idrPerSqM * productArea)) : String((idrPerSqM * productArea).toFixed(2)));
     } else {
-      setPricePerSqM(0);
-      setPricePerPcs(0);
+      setPricePerSqMIdr(0);
+      setPricePerPcsIdr(0);
       setPricePerSqMStr('');
       setPricePerPcsStr('');
     }
   }, [initialCostPerSqM, productArea]);
 
   const handlePerSqMInputChange = (raw: string) => {
-    // Validate: only digits and max one separator (comma or dot)
     const commaCount = (raw.match(/,/g) || []).length;
     const dotCount = (raw.match(/\./g) || []).length;
-    
-    // Allow only if: no separators, OR one comma, OR one dot (not both)
-    if (commaCount > 1 || dotCount > 1 || (commaCount > 0 && dotCount > 0)) {
-      return; // Invalid - multiple separators or both comma and dot
-    }
-    
-    // Allow only numbers with optional single comma or dot
-    if (!/^\d*[,.]?\d*$/.test(raw) && raw !== '') {
-      return; // Invalid characters
-    }
-    
-    // Replace comma with dot for calculation
+    if (commaCount > 1 || dotCount > 1 || (commaCount > 0 && dotCount > 0)) return;
+    if (!/^\d*[,.]?\d*$/.test(raw) && raw !== '') return;
+
     const normalized = raw.replace(',', '.');
-    setPricePerSqMStr(raw); // Keep original input (with comma if user typed comma)
-    
-    // Parse and update values
+    setPricePerSqMStr(raw);
+
     if (raw === '') {
-      setPricePerSqM(0);
-      setPricePerPcs(0);
+      setPricePerSqMIdr(0);
+      setPricePerPcsIdr(0);
       setPricePerPcsStr('');
       onStoneCostChange(0);
     } else {
-      const value = parseFloat(normalized) || 0;
-      setPricePerSqM(value);
-      const calculatedPricePerPcs = value * productArea;
-      setPricePerPcs(calculatedPricePerPcs);
-      setPricePerPcsStr(calculatedPricePerPcs > 0 ? calculatedPricePerPcs.toFixed(4) : '');
-      onStoneCostChange(value);
+      const valueIdr = parseFloat(normalized) || 0;
+      setPricePerSqMIdr(valueIdr);
+      const calculatedPcsIdr = valueIdr * productArea;
+      setPricePerPcsIdr(calculatedPcsIdr);
+      setPricePerPcsStr(calculatedPcsIdr % 1 === 0 ? String(Math.round(calculatedPcsIdr)) : calculatedPcsIdr.toFixed(2));
+      onStoneCostChange(valueIdr / IDR_PER_MIL);
     }
   };
 
   const handlePerPcsInputChange = (raw: string) => {
-    // Validate: only digits and max one separator (comma or dot)
     const commaCount = (raw.match(/,/g) || []).length;
     const dotCount = (raw.match(/\./g) || []).length;
-    
-    // Allow only if: no separators, OR one comma, OR one dot (not both)
-    if (commaCount > 1 || dotCount > 1 || (commaCount > 0 && dotCount > 0)) {
-      return; // Invalid - multiple separators or both comma and dot
-    }
-    
-    // Allow only numbers with optional single comma or dot
-    if (!/^\d*[,.]?\d*$/.test(raw) && raw !== '') {
-      return; // Invalid characters
-    }
-    
-    // Replace comma with dot for calculation
+    if (commaCount > 1 || dotCount > 1 || (commaCount > 0 && dotCount > 0)) return;
+    if (!/^\d*[,.]?\d*$/.test(raw) && raw !== '') return;
+
     const normalized = raw.replace(',', '.');
-    setPricePerPcsStr(raw); // Keep original input (with comma if user typed comma)
-    
-    // Parse and update values
+    setPricePerPcsStr(raw);
+
     if (raw === '') {
-      setPricePerPcs(0);
-      setPricePerSqM(0);
+      setPricePerPcsIdr(0);
+      setPricePerSqMIdr(0);
       setPricePerSqMStr('');
       onStoneCostChange(0);
     } else {
-      const value = parseFloat(normalized) || 0;
-      setPricePerPcs(value);
-      const calculatedPricePerSqM = productArea > 0 ? value / productArea : 0;
-      setPricePerSqM(calculatedPricePerSqM);
-      // Don't update the other field's string - keep it as user typed
-      onStoneCostChange(calculatedPricePerSqM);
+      const valueIdr = parseFloat(normalized) || 0;
+      setPricePerPcsIdr(valueIdr);
+      const calculatedSqMIdr = productArea > 0 ? valueIdr / productArea : 0;
+      setPricePerSqMIdr(calculatedSqMIdr);
+      setPricePerSqMStr(calculatedSqMIdr % 1 === 0 ? String(Math.round(calculatedSqMIdr)) : calculatedSqMIdr.toFixed(2));
+      onStoneCostChange(calculatedSqMIdr / IDR_PER_MIL);
     }
   };
 
@@ -130,7 +112,7 @@ export function StoneCostInput({
                 checked={inputMode === 'perSqM'}
                 onChange={() => setInputMode('perSqM')}
               />
-              <span>Per 1 m² (mil Rp)</span>
+              <span>Per 1 m² (Rp)</span>
             </label>
             <label className="price-mode-label">
               <input
@@ -139,44 +121,39 @@ export function StoneCostInput({
                 checked={inputMode === 'perPcs'}
                 onChange={() => setInputMode('perPcs')}
               />
-              <span>Per 1 piece (mil Rp)</span>
+              <span>Per 1 piece (Rp)</span>
             </label>
           </div>
 
           <div className="input-with-buttons">
-            {/* Input depending on mode */}
             {inputMode === 'perSqM' ? (
               <div className="input-group">
-                <label>Price per 1 m² (mil Rp)</label>
+                <label>Price per 1 m² (Rp)</label>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={pricePerSqMStr}
                   onChange={(e) => handlePerSqMInputChange(e.target.value)}
-                  onBlur={() => {
-                    // Keep user input as is - no auto-formatting
-                  }}
+                  onBlur={() => {}}
                   placeholder=""
                 />
                 <div className="calculated-info">
-                  Per 1 pcs: <strong>{pricePerPcs.toFixed(4)} mil Rp</strong>
+                  Per 1 pcs: <strong>{formatIDR(pricePerPcsIdr)}</strong>
                 </div>
               </div>
             ) : (
               <div className="input-group">
-                <label>Price per 1 piece (mil Rp)</label>
+                <label>Price per 1 piece (Rp)</label>
                 <input
                   type="text"
                   inputMode="decimal"
                   value={pricePerPcsStr}
                   onChange={(e) => handlePerPcsInputChange(e.target.value)}
-                  onBlur={() => {
-                    // Keep user input as is - no auto-formatting
-                  }}
+                  onBlur={() => {}}
                   placeholder=""
                 />
                 <div className="calculated-info">
-                  Per 1 m²: <strong>{pricePerSqM.toFixed(4)} mil Rp</strong>
+                  Per 1 m²: <strong>{formatIDR(pricePerSqMIdr)}</strong>
                 </div>
               </div>
             )}
@@ -205,17 +182,17 @@ export function StoneCostInput({
         <div className="input-with-buttons">
           {/* "Per piece only" mode */}
           <div className="input-group">
-            <label>Price per 1 piece (mil Rp)</label>
+            <label>Price per 1 piece (Rp)</label>
             <input
               type="text"
               inputMode="decimal"
               value={pricePerPcsStr}
               onChange={(e) => handlePerPcsInputChange(e.target.value)}
-              onBlur={() => setPricePerPcsStr(pricePerPcs > 0 ? pricePerPcs.toFixed(4) : '')}
+              onBlur={() => {}}
               placeholder=""
             />
             <div className="calculated-info">
-              Per 1 m²: <strong>{pricePerSqM.toFixed(4)} mil Rp</strong>
+              Per 1 m²: <strong>{formatIDR(pricePerSqMIdr)}</strong>
             </div>
           </div>
           
