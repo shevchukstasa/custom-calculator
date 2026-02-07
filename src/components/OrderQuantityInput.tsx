@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 
+/** Format m² to 2 decimals, avoid float noise (e.g. 98.99999999999999 → 99.00) */
+function m2ToStr(m2: number): string {
+  return (Math.round(m2 * 100) / 100).toFixed(2);
+}
+
 interface OrderQuantityInputProps {
   productArea: number; // m²
   onQuantityChange: (quantityPcs: number) => void;
@@ -7,51 +12,62 @@ interface OrderQuantityInputProps {
   showBothModes?: boolean; // if false, show only "per piece" input (default: true)
 }
 
+/** Allow digits, optional one comma or dot, up to 2 digits after separator */
+function isValidM2Input(raw: string): boolean {
+  if (raw === '') return true;
+  return /^\d*[,.]?\d{0,2}$/.test(raw);
+}
+
 export function OrderQuantityInput({
   productArea,
   onQuantityChange,
   initialQuantityPcs = 0,
-  showBothModes = true, // default: show both inputs
+  showBothModes = true,
 }: OrderQuantityInputProps) {
   const [quantityPcs, setQuantityPcs] = useState<number>(initialQuantityPcs);
-  const [quantityM2, setQuantityM2] = useState<number>(0);
+  const [m2InputStr, setM2InputStr] = useState<string>('');
 
-  // Sync when initial value or area changes
+  // Sync when initial value or product area changes (e.g. product dimensions changed)
   useEffect(() => {
     setQuantityPcs(initialQuantityPcs);
-    setQuantityM2(initialQuantityPcs * productArea);
+    setM2InputStr(initialQuantityPcs === 0 ? '' : m2ToStr(initialQuantityPcs * productArea));
   }, [initialQuantityPcs, productArea]);
 
   const handlePcsChange = (value: string) => {
-    // Only allow whole numbers for pieces
     const pcs = Math.round(parseFloat(value) || 0);
     setQuantityPcs(pcs);
-    setQuantityM2(pcs * productArea);
+    setM2InputStr(pcs === 0 ? '' : m2ToStr(pcs * productArea));
     onQuantityChange(pcs);
   };
 
-  const handleM2Change = (value: string) => {
-    // Allow empty string for better UX
-    if (value === '') {
-      setQuantityM2(0);
+  const handleM2Change = (raw: string) => {
+    if (raw === '') {
+      setM2InputStr('');
       setQuantityPcs(0);
       onQuantityChange(0);
       return;
     }
-    
-    const m2 = parseFloat(value) || 0;
-    setQuantityM2(m2);
-    // Always round pieces to whole number
+    if (!isValidM2Input(raw)) return;
+
+    const normalized = raw.replace(',', '.');
+    const m2 = parseFloat(normalized) || 0;
+    setM2InputStr(raw);
     const pcs = productArea > 0 ? Math.round(m2 / productArea) : 0;
     setQuantityPcs(pcs);
     onQuantityChange(pcs);
+  };
+
+  const handleM2Blur = () => {
+    if (m2InputStr === '') return;
+    const normalized = m2InputStr.replace(',', '.');
+    const m2 = parseFloat(normalized) || 0;
+    setM2InputStr(m2ToStr(m2));
   };
 
   return (
     <div className="order-quantity-input">
       <h3>Order Quantity</h3>
       {showBothModes ? (
-        // Mode 1: Both pieces and m² inputs (for tiles)
         <div className="dual-input-group">
           <div className="input-field">
             <label>Quantity (pcs)</label>
@@ -61,7 +77,7 @@ export function OrderQuantityInput({
               step="1"
               value={quantityPcs === 0 ? '' : Math.round(quantityPcs)}
               onChange={(e) => handlePcsChange(e.target.value)}
-              placeholder="0"
+              placeholder=""
             />
           </div>
 
@@ -70,18 +86,16 @@ export function OrderQuantityInput({
           <div className="input-field">
             <label>Quantity (m²)</label>
             <input
-              type="number"
-              min="0"
-              max="1000"
-              step="0.01"
-              value={quantityM2 === 0 ? '' : quantityM2}
+              type="text"
+              inputMode="decimal"
+              value={m2InputStr}
               onChange={(e) => handleM2Change(e.target.value)}
-              placeholder="0"
+              onBlur={handleM2Blur}
+              placeholder=""
             />
           </div>
         </div>
       ) : (
-        // Mode 2: Only pieces input (for countertops, sinks, 3D products)
         <div className="single-input-group">
           <div className="input-field">
             <label>Quantity (pcs)</label>
@@ -91,7 +105,7 @@ export function OrderQuantityInput({
               step="1"
               value={quantityPcs === 0 ? '' : Math.round(quantityPcs)}
               onChange={(e) => handlePcsChange(e.target.value)}
-              placeholder="0"
+              placeholder=""
             />
           </div>
         </div>

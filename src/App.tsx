@@ -126,6 +126,8 @@ function App() {
 
   // Cost result modal: show results in popup after Calculate Cost (close only via OK)
   const [showCostResultModal, setShowCostResultModal] = useState(false);
+  // Price in result: per m² or per piece, follows stone price input mode
+  const [stonePriceDisplayMode, setStonePriceDisplayMode] = useState<'perSqM' | 'perPcs'>('perSqM');
   const [conflictPrices, setConflictPrices] = useState<number[]>([]);
   const [conflictEntries, setConflictEntries] = useState<StoneEntry[]>([]);
 
@@ -883,6 +885,7 @@ function App() {
                                 showBothInputs={shouldShowBothPriceInputs(productType, tileShape)}
                                 hideButtons={true}
                                 hideProductArea={true}
+                                onStonePriceModeChange={setStonePriceDisplayMode}
                               />
                             </>
                           )}
@@ -963,7 +966,7 @@ function App() {
             <section className="bottom-section">
               {costResult && (
                 <div className="cost-results-area">
-                  <CostResults result={costResult} selectedMarket={selectedMarket} />
+                  <CostResults result={costResult} selectedMarket={selectedMarket} priceDisplayMode={stonePriceDisplayMode} />
                 </div>
               )}
             </section>
@@ -1028,7 +1031,7 @@ function App() {
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Cost calculation results">
           <div className="modal-content cost-result-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="cost-result-modal-body">
-              <CostResults result={costResult} selectedMarket={selectedMarket} />
+              <CostResults result={costResult} selectedMarket={selectedMarket} priceDisplayMode={stonePriceDisplayMode} />
             </div>
             <div className="cost-result-modal-footer">
               <button type="button" className="button button-primary" onClick={() => setShowCostResultModal(false)}>

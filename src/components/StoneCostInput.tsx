@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { formatIDR } from '../utils/costCalculations';
 
+export type StonePriceDisplayMode = 'perSqM' | 'perPcs';
+
 interface StoneCostInputProps {
   productArea: number; // m² of one product (length × width / 10000)
   onStoneCostChange: (costPerSqM: number) => void; // parent expects mil Rp per m²
@@ -9,8 +11,9 @@ interface StoneCostInputProps {
   onAutoFind: () => void;
   showDB: boolean;
   showBothInputs: boolean; // if false, show only "per piece"
-  hideButtons?: boolean; // if true, don't render Database/Auto-select buttons
-  hideProductArea?: boolean; // if true, don't render product area text
+  hideButtons?: boolean;
+  hideProductArea?: boolean;
+  onStonePriceModeChange?: (mode: StonePriceDisplayMode) => void; // for result popup: show price per m² or per piece
 }
 
 const IDR_PER_MIL = 1e6;
@@ -24,9 +27,17 @@ export function StoneCostInput({
   showDB,
   showBothInputs,
   hideButtons = false,
-  hideProductArea = false
+  hideProductArea = false,
+  onStonePriceModeChange
 }: StoneCostInputProps) {
   const [inputMode, setInputMode] = useState<'perSqM' | 'perPcs'>('perSqM');
+
+  // Report current mode to parent (for cost result: show price per m² or per piece)
+  useEffect(() => {
+    if (!onStonePriceModeChange) return;
+    onStonePriceModeChange(showBothInputs ? inputMode : 'perPcs');
+  }, [showBothInputs, inputMode, onStonePriceModeChange]);
+
   // All amounts in IDR (rupiah) for display and internal state
   const [pricePerSqMIdr, setPricePerSqMIdr] = useState<number>(0);
   const [pricePerPcsIdr, setPricePerPcsIdr] = useState<number>(0);
@@ -110,7 +121,10 @@ export function StoneCostInput({
                 type="radio"
                 name="stonePriceMode"
                 checked={inputMode === 'perSqM'}
-                onChange={() => setInputMode('perSqM')}
+                onChange={() => {
+                  setInputMode('perSqM');
+                  onStonePriceModeChange?.('perSqM');
+                }}
               />
               <span>Per 1 m² (Rp)</span>
             </label>
@@ -119,7 +133,10 @@ export function StoneCostInput({
                 type="radio"
                 name="stonePriceMode"
                 checked={inputMode === 'perPcs'}
-                onChange={() => setInputMode('perPcs')}
+                onChange={() => {
+                  setInputMode('perPcs');
+                  onStonePriceModeChange?.('perPcs');
+                }}
               />
               <span>Per 1 piece (Rp)</span>
             </label>
