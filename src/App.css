@@ -2813,27 +2813,35 @@ input[type="checkbox"] {
   min-width: 120px;
 }
 
-/* Cost result modal: larger text (~1.5x) for readability */
+/* Cost result modal: large text for readability (min ~16px, summary 18px+) */
+.cost-result-modal-body {
+  font-size: 16px;
+}
 .cost-result-modal-body .result-header h2 {
-  font-size: 1.28rem;
+  font-size: 1.35rem;
+  font-weight: 700;
 }
 .cost-result-modal-body .price-label {
-  font-size: 1.58rem;
+  font-size: 1.25rem;
 }
 .cost-result-modal-body .price-value.main {
-  font-size: 2.25rem;
+  font-size: 2.35rem;
+  font-weight: 700;
 }
 .cost-result-modal-body .price-secondary {
-  font-size: 1.58rem;
+  font-size: 1.25rem;
 }
 .cost-result-modal-body .order-summary-block h4 {
-  font-size: 1.28rem;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 .cost-result-modal-body .summary-item {
-  font-size: 1rem;
-  padding: 0.2rem 0;
+  font-size: 1.125rem;
+  padding: 0.35rem 0;
+  min-height: 1.5em;
 }
 .cost-result-modal-body .summary-label,
 .cost-result-modal-body .summary-value {
-  font-size: 1rem;
+  font-size: 1.125rem;
+  line-height: 1.4;
 }

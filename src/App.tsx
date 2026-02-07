@@ -966,7 +966,7 @@ function App() {
             <section className="bottom-section">
               {costResult && (
                 <div className="cost-results-area">
-                  <CostResults result={costResult} selectedMarket={selectedMarket} priceDisplayMode={stonePriceDisplayMode} />
+                  <CostResults result={costResult} selectedMarket={selectedMarket} priceDisplayMode={shouldShowBothPriceInputs(productType, tileShape) ? stonePriceDisplayMode : 'perPcs'} />
                 </div>
               )}
             </section>
@@ -1031,7 +1031,7 @@ function App() {
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-label="Cost calculation results">
           <div className="modal-content cost-result-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="cost-result-modal-body">
-              <CostResults result={costResult} selectedMarket={selectedMarket} priceDisplayMode={stonePriceDisplayMode} />
+              <CostResults result={costResult} selectedMarket={selectedMarket} priceDisplayMode={shouldShowBothPriceInputs(productType, tileShape) ? stonePriceDisplayMode : 'perPcs'} />
             </div>
             <div className="cost-result-modal-footer">
               <button type="button" className="button button-primary" onClick={() => setShowCostResultModal(false)}>
