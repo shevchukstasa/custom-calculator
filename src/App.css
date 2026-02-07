@@ -2812,3 +2812,28 @@ input[type="checkbox"] {
 .cost-result-modal-footer .button {
   min-width: 120px;
 }
+
+/* Cost result modal: larger text (~1.5x) for readability */
+.cost-result-modal-body .result-header h2 {
+  font-size: 1.28rem;
+}
+.cost-result-modal-body .price-label {
+  font-size: 1.58rem;
+}
+.cost-result-modal-body .price-value.main {
+  font-size: 2.25rem;
+}
+.cost-result-modal-body .price-secondary {
+  font-size: 1.58rem;
+}
+.cost-result-modal-body .order-summary-block h4 {
+  font-size: 1.28rem;
+}
+.cost-result-modal-body .summary-item {
+  font-size: 1rem;
+  padding: 0.2rem 0;
+}
+.cost-result-modal-body .summary-label,
+.cost-result-modal-body .summary-value {
+  font-size: 1rem;
+}

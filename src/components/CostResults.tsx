@@ -51,7 +51,13 @@ export function CostResults({ result, selectedMarket, priceDisplayMode = 'perSqM
     result.product.shape === 'round'
       ? `Diameter: ${result.product.length} × thickness: ${result.product.thickness} cm`
       : `${result.product.length} × ${result.product.width} × ${result.product.thickness} cm`;
-  const stoneCostIdr = (result.parameters.stoneCost || 0) * 1e6;
+  const stoneCostPerSqMIdr = (result.parameters.stoneCost || 0) * 1e6;
+  const stoneCostPerPcsIdr = stoneCostPerSqMIdr * result.productArea;
+  const quantityStr = showPerSqM
+    ? `${(result.orderQuantity * result.productArea).toFixed(2)} m²`
+    : `${result.orderQuantity} pcs`;
+  const stonePriceLabel = showPerSqM ? 'Stone price per m² (entered):' : 'Stone price per piece (entered):';
+  const stonePriceValue = showPerSqM ? stoneCostPerSqMIdr : stoneCostPerPcsIdr;
 
   return (
     <div className="cost-results">
@@ -71,6 +77,10 @@ export function CostResults({ result, selectedMarket, priceDisplayMode = 'perSqM
             <h4>Order summary</h4>
             <div className="summary-grid">
               <div className="summary-item">
+                <span className="summary-label">Quantity:</span>
+                <span className="summary-value">{quantityStr}</span>
+              </div>
+              <div className="summary-item">
                 <span className="summary-label">Product:</span>
                 <span className="summary-value">{productTypeLabel}</span>
               </div>
@@ -87,8 +97,8 @@ export function CostResults({ result, selectedMarket, priceDisplayMode = 'perSqM
                 <span className="summary-value">{sizeStr}</span>
               </div>
               <div className="summary-item">
-                <span className="summary-label">Stone price (entered):</span>
-                <span className="summary-value">{formatIDR(stoneCostIdr)}</span>
+                <span className="summary-label">{stonePriceLabel}</span>
+                <span className="summary-value">{formatIDR(stonePriceValue)}</span>
               </div>
               <div className="summary-item">
                 <span className="summary-label">Custom glaze color:</span>
