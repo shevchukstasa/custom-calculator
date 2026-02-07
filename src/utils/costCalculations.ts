@@ -240,6 +240,16 @@ export function formatIDR(amount: number): string {
   }).format(amount);
 }
 
+/** Итоговая цена в целых рупиях (без копеек), для отображения в результате */
+export function formatIDRWhole(amount: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(amount));
+}
+
 /**
  * Форматирование числа с разделителями (без валюты)
  */

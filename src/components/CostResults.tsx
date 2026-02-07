@@ -1,5 +1,5 @@
 import { CostCalculationResult, Market, ProductType, TileShape, GlazePlacement } from '../types';
-import { formatIDR, formatNumber } from '../utils/costCalculations';
+import { formatIDR, formatIDRWhole, formatNumber } from '../utils/costCalculations';
 
 type StonePriceDisplayMode = 'perSqM' | 'perPcs';
 
@@ -39,10 +39,9 @@ export function CostResults({ result, selectedMarket, priceDisplayMode = 'perSqM
 
   const showPerSqM = priceDisplayMode === 'perSqM';
   const priceValue = showPerSqM ? marketData.pricePerSqM : marketData.pricePerPcs;
+  const priceRoundedTo10 = Math.round(priceValue / 10) * 10;
   const priceLabel = showPerSqM ? 'Price per 1 m²' : 'Price per 1 piece';
-  const priceSecondary = showPerSqM
-    ? formatNumber(marketData.pricePerSqM / 1000000, 2) + ' mil Rp'
-    : formatNumber(marketData.pricePerPcs / 1000000, 3) + ' mil Rp';
+  const priceSecondary = formatNumber(priceRoundedTo10 / 1000000, 2) + ' mil Rp';
 
   const productTypeLabel = result.product.type ? PRODUCT_TYPE_LABELS[result.product.type] : '—';
   const shapeLabel = result.product.shape ? SHAPE_LABELS[result.product.shape] : '—';
@@ -69,13 +68,13 @@ export function CostResults({ result, selectedMarket, priceDisplayMode = 'perSqM
         <div className="results-left-column">
           <div className="price-item highlight">
             <div className="price-label">{priceLabel}</div>
-            <div className="price-value main">{formatIDR(priceValue)}</div>
+            <div className="price-value main">{formatIDRWhole(priceRoundedTo10)}</div>
             <div className="price-secondary">{priceSecondary}</div>
           </div>
 
           <div className="order-summary-block">
             <h4>Order summary</h4>
-            <div className="summary-grid">
+            <div className="summary-grid summary-grid-list">
               <div className="summary-item">
                 <span className="summary-label">Quantity:</span>
                 <span className="summary-value">{quantityStr}</span>

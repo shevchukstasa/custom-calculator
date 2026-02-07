@@ -1304,6 +1304,31 @@ body {
   gap: 0.25rem;
 }
 
+/* Order summary as a single column list: label and value aligned in two columns */
+.summary-grid-list {
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
+}
+
+.summary-grid-list .summary-item {
+  display: grid;
+  grid-template-columns: minmax(10ch, auto) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.35rem 0;
+}
+
+.summary-grid-list .summary-label {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.summary-grid-list .summary-value {
+  text-align: right;
+  word-break: break-word;
+  min-width: 0;
+}
+
 @media (max-width: 900px) {
   .summary-grid {
     grid-template-columns: 1fr;
